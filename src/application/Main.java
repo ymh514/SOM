@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
@@ -31,8 +33,8 @@ public class Main extends Application {
 	static float studyRate = 0.1f;
 	static float layoutX = 800;
 	static float layoutY = 800;
-	static int dataRatio = 50;
-
+	static int dataRatio = 100;
+	
 	static Color red = Color.RED;
 	static Color green = Color.GREEN;
 	static Color blue = Color.BLUE;
@@ -57,7 +59,8 @@ public class Main extends Application {
 		public void doSum(float inX,float inY){
 //			System.out.println("inX: "+inX+"\t inY: "+inY);
 			sumValue = 0;
-			sumValue = Math.abs(inX*x+inY*y);
+//			sumValue = (float) Math.abs(Math.hypot(inX-x, inY-y));
+			sumValue = inX*x+inY*y;
 		}
 		public float getSum(){
 			return sumValue;
@@ -76,14 +79,18 @@ public class Main extends Application {
 		
 			inputFileChoose(null);
 			
-			//normalizeData(inputArray);
-			
+			normalizeData(inputArray);
+	
 			sortInputArray(inputArray);
+	
+			printArrayData(sortedArray);
 			
 			classAmount = sortedNewDesire + 1;
 			
+			
 			Pane canvas = new Pane();
 			canvas.setStyle("-fx-background-color: #AAAAAA");
+			
 			canvas = drawLine(canvas);
 			
 			colorType();
@@ -91,14 +98,14 @@ public class Main extends Application {
 			canvas = drawDataPoints(canvas);
 
 			neuralCordinate n1 = new neuralCordinate(0, 0);
-			neuralCordinate n2 = new neuralCordinate(1, 0);
-			neuralCordinate n3 = new neuralCordinate(2, 0);
-			neuralCordinate n4 = new neuralCordinate(0, 1);
-			neuralCordinate n5 = new neuralCordinate(1, 1);
-			neuralCordinate n6 = new neuralCordinate(2, 1);
-			neuralCordinate n7 = new neuralCordinate(0, 2);
-			neuralCordinate n8 = new neuralCordinate(1, 2);
-			neuralCordinate n9 = new neuralCordinate(2, 2);
+			neuralCordinate n2 = new neuralCordinate(0.5f, 0);
+			neuralCordinate n3 = new neuralCordinate(1, 0);
+			neuralCordinate n4 = new neuralCordinate(0, 0.5f);
+			neuralCordinate n5 = new neuralCordinate(0.5f, 0.5f);
+			neuralCordinate n6 = new neuralCordinate(1, 0.5f);
+			neuralCordinate n7 = new neuralCordinate(0, 1);
+			neuralCordinate n8 = new neuralCordinate(0.5f, 1);
+			neuralCordinate n9 = new neuralCordinate(1, 1);
 			
 			ArrayList<neuralCordinate> an1 = new ArrayList<neuralCordinate>();
 			an1.add(n1);
@@ -116,38 +123,42 @@ public class Main extends Application {
 			an3.add(n9);
 			neuralArray.add(an3);
 			
-			canvas = drawNeurals(canvas);
-			System.out.println(neuralArray.size());
-			System.out.println(neuralArray.get(0).size());
-			
-			
-			for(int i = 0;i<neuralArray.size();i++){
-				for(int j=0;j<neuralArray.get(i).size()-1;j++){
-					Line linkH = new Line();
-					linkH.setStroke(Color.YELLOW);
-					linkH.setStartX(neuralArray.get(i).get(j).getX()*dataRatio+(layoutX/2));
-					linkH.setStartY(neuralArray.get(i).get(j).getY()*dataRatio+(layoutY/2));
-					linkH.setEndX(neuralArray.get(i).get(j+1).getX()*dataRatio+(layoutX/2));
-					linkH.setEndY(neuralArray.get(i).get(j+1).getY()*dataRatio+(layoutY/2)); 
-					
-					canvas.getChildren().add(linkH);			
-				}
-			}
-			for(int i=0;i<neuralArray.size()-1;i++){
-				for(int j=0;j<neuralArray.get(i).size();j++){
-					Line linkV = new Line();
-					linkV.setStroke(Color.YELLOW);
-					linkV.setStartX(neuralArray.get(i).get(j).getX()*dataRatio+(layoutX/2));
-					linkV.setStartY(neuralArray.get(i).get(j).getY()*dataRatio+(layoutY/2));
-					linkV.setEndX(neuralArray.get(i+1).get(j).getX()*dataRatio+(layoutX/2));
-					linkV.setEndY(neuralArray.get(i+1).get(j).getY()*dataRatio+(layoutY/2));
-					canvas.getChildren().add(linkV);
-				}
-			}
+//			canvas = drawNeurals(canvas);
+//			System.out.println(neuralArray.size());
+//			System.out.println(neuralArray.get(0).size());
+//			
+//			
+//			for(int i = 0;i<neuralArray.size();i++){
+//				for(int j=0;j<neuralArray.get(i).size()-1;j++){
+//					Line linkH = new Line();
+//					linkH.setStroke(Color.YELLOW);
+//					linkH.setStartX(neuralArray.get(i).get(j).getX()*dataRatio+(layoutX/2));
+//					linkH.setStartY(neuralArray.get(i).get(j).getY()*dataRatio+(layoutY/2));
+//					linkH.setEndX(neuralArray.get(i).get(j+1).getX()*dataRatio+(layoutX/2));
+//					linkH.setEndY(neuralArray.get(i).get(j+1).getY()*dataRatio+(layoutY/2)); 
+//					
+//					canvas.getChildren().add(linkH);			
+//				}
+//			}
+//			for(int i=0;i<neuralArray.size()-1;i++){
+//				for(int j=0;j<neuralArray.get(i).size();j++){
+//					Line linkV = new Line();
+//					linkV.setStroke(Color.YELLOW);
+//					linkV.setStartX(neuralArray.get(i).get(j).getX()*dataRatio+(layoutX/2));
+//					linkV.setStartY(neuralArray.get(i).get(j).getY()*dataRatio+(layoutY/2));
+//					linkV.setEndX(neuralArray.get(i+1).get(j).getX()*dataRatio+(layoutX/2));
+//					linkV.setEndY(neuralArray.get(i+1).get(j).getY()*dataRatio+(layoutY/2));
+//					canvas.getChildren().add(linkV);
+//				}
+//			}
 			
 			
 			int noOfData = 0;
-			while(true){
+			int looptimes =0;
+			Collections.shuffle(sortedArray);
+	
+			while(looptimes<2){
+
 				distanceArray = new ArrayList<ArrayList<Float>>();
 				int winnerI = 0;
 				int winnerJ = 0;
@@ -165,8 +176,8 @@ public class Main extends Application {
 			
 				for(int i =0;i<neuralArray.size();i++){
 					for(int j=0;j<neuralArray.get(i).size();j++){
-						System.out.println("i: "+i+"\t j: "+j+"\t sum : "+neuralArray.get(i).get(j).getSum());
-						if(neuralArray.get(i).get(j).getSum()>=sumTemp){
+						System.out.println("i: "+i+"\t j: "+j+"\t distance wiz data : "+neuralArray.get(i).get(j).getSum());
+						if(neuralArray.get(i).get(j).getSum()>= sumTemp){
 							sumTemp = neuralArray.get(i).get(j).getSum();
 							winnerI = i;
 							winnerJ = j;
@@ -204,20 +215,51 @@ public class Main extends Application {
 
 				for(int i =0;i<neuralArray.size();i++){
 					for(int j=0;j<neuralArray.get(i).size();j++){
-						float oriX = neuralArray.get(i).get(j).getX();
-						float oriY = neuralArray.get(i).get(j).getY();
-						neuralArray.get(i).get(j).setX((float)(oriX+(studyRate*Math.exp(Math.pow(distanceArray.get(i).get(j), 2)/-2))*(dataX-oriX)));
-						neuralArray.get(i).get(j).setY((float)(oriY+(studyRate*Math.exp(Math.pow(distanceArray.get(i).get(j), 2)/-2))*(dataY-oriY)));
+						if(i==winnerI&&j==winnerJ){
+							
+						}
+						else{
+							float oriX = neuralArray.get(i).get(j).getX();
+							float oriY = neuralArray.get(i).get(j).getY();
+							neuralArray.get(i).get(j).setX((float)(oriX+(studyRate*Math.exp(Math.pow(distanceArray.get(i).get(j), 2)/-2))*(dataX-oriX)));
+							neuralArray.get(i).get(j).setY((float)(oriY+(studyRate*Math.exp(Math.pow(distanceArray.get(i).get(j), 2)/-2))*(dataY-oriY)));
+						
+						}
 					}
 				}		
 				
 				printNeuralXY();
 
-				if(noOfData==sortedArray.size()-1){
-					break;
-				}
-				noOfData++;
+				float weightMaxX = Float.MIN_VALUE;
+				float weightMaxY = Float.MIN_VALUE;
 				
+				for(int i=0;i<neuralArray.size();i++){
+					for(int j=0;j<neuralArray.get(i).size();j++){
+						if (Math.abs(neuralArray.get(i).get(j).getX()) > weightMaxX) {
+							weightMaxX = Math.abs(neuralArray.get(i).get(j).getX());
+						}
+						if (Math.abs(neuralArray.get(i).get(j).getY()) > weightMaxY) {
+							weightMaxY = Math.abs(neuralArray.get(i).get(j).getY());
+						}
+					}
+				}
+				
+				for(int i=0;i<neuralArray.size();i++){
+					for(int j=0;j<neuralArray.get(i).size();j++){
+						neuralArray.get(i).get(j).setX(neuralArray.get(i).get(j).getX()/weightMaxX);
+						neuralArray.get(i).get(j).setY(neuralArray.get(i).get(j).getY()/weightMaxY);
+
+					}
+				}
+				
+				if(noOfData==sortedArray.size()-1){
+					noOfData=0;
+					Collections.shuffle(sortedArray);
+					looptimes++;
+				}
+				else{
+					noOfData++;
+				}
 			}
 			
 			canvas = drawNeurals(canvas);
@@ -259,6 +301,28 @@ public class Main extends Application {
 			
 		} catch(Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void normalizeData(ArrayList<float[]> array) {
+		/*
+		 * idea: find the biggest number(no matter positive or
+		 *       negative ,set it as denominator
+		 */
+		float maxX = Float.MIN_VALUE;
+		float maxY = Float.MIN_VALUE;
+		
+		for (int i = 0; i < array.size(); i++) {
+			if (Math.abs(array.get(i)[0]) > maxX) {
+				maxX = Math.abs(array.get(i)[0]);
+			}
+			if (Math.abs(array.get(i)[1]) > maxY) {
+				maxY = Math.abs(array.get(i)[1]);
+			}
+		}
+		for (int i = 0; i < array.size(); i++) {
+				array.get(i)[0] /= maxX;
+				array.get(i)[1] /= maxY;
 		}
 	}
 	
@@ -410,23 +474,7 @@ public class Main extends Application {
 		System.out.println("The max sorted desire : " + sortedNewDesire);
 	}
 	
-	private static void normalizeData(ArrayList<float[]> array) {
-		/*
-		 * idea: find the biggest number(no matter positive or
-		 *       negative ,set it as denominator
-		 */
-		for (int i = 0; i < array.size(); i++) {
-			float max = Float.MIN_VALUE;
-			for (int j = 0; j < array.get(i).length - 1; j++) {
-				if (Math.abs(array.get(i)[j]) > max) {
-					max = Math.abs(array.get(i)[j]);
-				}
-			}
-			for (int k = 0; k < array.get(i).length - 1; k++) {
-				array.get(i)[k] /= max;
-			}
-		}
-	}
+
 	
 	public static void inputFileChoose(String[] args) throws IOException {
 
