@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Random;
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
@@ -99,15 +100,15 @@ public class Main extends Application {
 			
 			canvas = drawDataPoints(canvas);
 
-			neuralCordinate n1 = new neuralCordinate(-1, -1);
-			neuralCordinate n2 = new neuralCordinate(0, -1);
-			neuralCordinate n3 = new neuralCordinate(1, -1);
-			neuralCordinate n4 = new neuralCordinate(-1, 0);
-			neuralCordinate n5 = new neuralCordinate(0, 0);
-			neuralCordinate n6 = new neuralCordinate(1, 0);
-			neuralCordinate n7 = new neuralCordinate(-1, 1);
-			neuralCordinate n8 = new neuralCordinate(0, 1);
-			neuralCordinate n9 = new neuralCordinate(1, 1);
+			neuralCordinate n1 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n2 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n3 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n4 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n5 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n6 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n7 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n8 = new neuralCordinate(generateRandom(), generateRandom());
+			neuralCordinate n9 = new neuralCordinate(generateRandom(), generateRandom());
 			
 			ArrayList<neuralCordinate> an1 = new ArrayList<neuralCordinate>();
 			an1.add(n1);
@@ -154,11 +155,12 @@ public class Main extends Application {
 //				}
 //			}
 			
+			printNeuralXY();
 			
 			int noOfData = 0;
 			int looptimes =0;
 	
-			while(looptimes<1){
+			while(looptimes<2){
 
 				distanceArray = new ArrayList<ArrayList<Float>>();
 				int winnerI = 0;
@@ -232,27 +234,27 @@ public class Main extends Application {
 				
 				printNeuralXY();
 
-				float weightMaxX = Float.MIN_VALUE;
-				float weightMaxY = Float.MIN_VALUE;
-				
-				for(int i=0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						if (Math.abs(neuralArray.get(i).get(j).getX()) > weightMaxX) {
-							weightMaxX = Math.abs(neuralArray.get(i).get(j).getX());
-						}
-						if (Math.abs(neuralArray.get(i).get(j).getY()) > weightMaxY) {
-							weightMaxY = Math.abs(neuralArray.get(i).get(j).getY());
-						}
-					}
-				}
-				
-				for(int i=0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						neuralArray.get(i).get(j).setX(neuralArray.get(i).get(j).getX()/weightMaxX);
-						neuralArray.get(i).get(j).setY(neuralArray.get(i).get(j).getY()/weightMaxY);
-
-					}
-				}
+//				float weightMaxX = Float.MIN_VALUE;
+//				float weightMaxY = Float.MIN_VALUE;
+//				
+//				for(int i=0;i<neuralArray.size();i++){
+//					for(int j=0;j<neuralArray.get(i).size();j++){
+//						if (Math.abs(neuralArray.get(i).get(j).getX()) > weightMaxX) {
+//							weightMaxX = Math.abs(neuralArray.get(i).get(j).getX());
+//						}
+//						if (Math.abs(neuralArray.get(i).get(j).getY()) > weightMaxY) {
+//							weightMaxY = Math.abs(neuralArray.get(i).get(j).getY());
+//						}
+//					}
+//				}
+//				
+//				for(int i=0;i<neuralArray.size();i++){
+//					for(int j=0;j<neuralArray.get(i).size();j++){
+//						neuralArray.get(i).get(j).setX(neuralArray.get(i).get(j).getX()/weightMaxX);
+//						neuralArray.get(i).get(j).setY(neuralArray.get(i).get(j).getY()/weightMaxY);
+//
+//					}
+//				}
 				
 				if(noOfData==sortedArray.size()-1){
 					noOfData=0;
@@ -304,6 +306,18 @@ public class Main extends Application {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static float generateRandom(){
+		Random rand = new Random();
+		float a = 0;
+		if (Math.random() > 0.5) {
+			a = rand.nextFloat() + 0f;
+			// System.out.println("weight : " + token[j]);
+		} else {
+			a = rand.nextFloat() - 1f;
+		}
+		return a;
 	}
 	
 	private static void normalizeData(ArrayList<float[]> array) {
