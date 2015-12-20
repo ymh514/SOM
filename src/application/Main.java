@@ -5,40 +5,49 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
+
+
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 
 
 public class Main extends Application {
 	static ArrayList<float[]> inputArray = new ArrayList<float[]>();
 	static ArrayList<float[]> sortedArray = new ArrayList<float[]>();
-	static ArrayList<ArrayList<neuralCordinate>> neuralArray = new ArrayList<ArrayList<neuralCordinate>>();
+	static ArrayList<Color> colorArray = new ArrayList<Color>();
+	static ArrayList<ArrayList<neuralCordinate>> neuralArray = new ArrayList<ArrayList<neuralCordinate>>(); ;
 	static ArrayList<ArrayList<Float>> distanceArray ;
 	static ArrayList<ArrayList<Float>> probArray ;
-
-	static ArrayList<Color> colorArray = new ArrayList<Color>();
-
-	static int net = 6;
-
+	
+	static Pane canvas = new Pane();
+	
 	static int sortedNewDesire = 0;
 	static int classAmount;
-	static int looptimesLimit = net*net*500;
-	static float initailStudyRate = 1f;
-	static float initailArea = 1f;
+	static int net;
+	static int looptimesLimit;
+	static float initailStudyRate;
+	static float initailArea;
+	
 	static float layoutX = 800;
 	static float layoutY = 800;
 	static int dataRatio = 200;
 	
+
 	static Color red = Color.RED;
 	static Color green = Color.GREEN;
 	static Color blue = Color.BLUE;
@@ -50,13 +59,14 @@ public class Main extends Application {
 		float y;
 		int p1;
 		int p2;
-		float sumValue;
+		float disValue;
+		
 		public neuralCordinate(float iniX,float iniY,int p1,int p2){
 			this.x=iniX;
 			this.y=iniY;
 			this.p1 = p1;
 			this.p2 = p2;
-			this.sumValue=0;
+			this.disValue=0;
 		}
 		
 		public void setX(float inX){
@@ -65,13 +75,11 @@ public class Main extends Application {
 		public void setY(float inY){
 			y = inY;
 		}
-		public void doSum(float inX,float inY){
-//			System.out.println("inX: "+inX+"\t inY: "+inY);
-			sumValue = (float) Math.abs(Math.hypot(inX-x, inY-y));
-//			sumValue = inX*x+inY*y;
+		public void doCal(float inX,float inY){
+			disValue = (float) Math.abs(Math.hypot(inX-x, inY-y));
 		}
 		public float getSum(){
-			return sumValue;
+			return disValue;
 		}
 		public float getX(){
 			return x;
@@ -90,199 +98,199 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-		
-			inputFileChoose(null);
-			
-			normalizeData(inputArray);
-	
-			sortInputArray(inputArray);
-			
-//			Collections.shuffle(sortedArray);
 
-//			printArrayData(sortedArray);
+			GridPane root = new GridPane();
 			
-			classAmount = sortedNewDesire + 1;
+			root.setAlignment(Pos.TOP_LEFT);
+			root.setHgap(5);
+			root.setVgap(5);
+			root.setGridLinesVisible(false);
 			
+			VBox btnVbox = new VBox(20);
+			Button chooseFile = new Button("Choose File");
+			Button generateRandomNet = new Button("Generate Neurals");
+			Button doAlgo = new Button("Go !");
+			Text studyRatemsg = new Text("studyrate : ");
+			Text omegamsg = new Text("omega : ");
+			Text looptimesmsg = new Text("looptimes : ");
+			Text neuralmsg = new Text("neural * neural : ");
+			TextField studyRateText = new TextField("1");
+			TextField omegaText = new TextField("1");
+			TextField looptimesText = new TextField("100");
+			TextField neuralText = new TextField("5");
+
+
+			btnVbox.setPadding(new Insets(15,15,15,15));
+			btnVbox.getChildren().addAll(chooseFile,generateRandomNet,doAlgo,neuralmsg,neuralText,studyRatemsg,studyRateText,omegamsg,omegaText,looptimesmsg,looptimesText);
 			
-			Pane canvas = new Pane();
 			canvas.setStyle("-fx-background-color: #AAAAAA");
 			
-			canvas = drawLine(canvas);
-			
-			colorType();
-			
-			canvas = drawDataPoints(canvas);
+			drawCordinateLine();
 
-			for(int i=0;i<net;i++){
-				ArrayList<neuralCordinate> an = new ArrayList<neuralCordinate>();
-				for(int j=0;j<net;j++){
-					neuralCordinate n = new neuralCordinate(generateRandom(),generateRandom(),i,j);
-					an.add(n);
-				}
-				neuralArray.add(an);
-			}
-						
-//			canvas = drawNeurals(canvas);
-//			System.out.println(neuralArray.size());
-//			System.out.println(neuralArray.get(0).size());
-//			
-//			
-//			canvas = drawNeuralLine(canvas,Color.DEEPSKYBLUE);
-			
-//			printNeuralXY();
-			
-
-			probArray = new ArrayList<ArrayList<Float>>();
-			
-			for(int i =0;i<neuralArray.size();i++){
-				ArrayList<Float> tempArray = new ArrayList<Float>();
-				for(int j=0;j<neuralArray.get(i).size();j++){
-					float dist = 0;
-					tempArray.add(dist);
-				}
-				probArray.add(tempArray);
-			}	
-			
-			
-			int noOfData = 0;
-			int looptimes =0;
-
-			while(looptimes<looptimesLimit){
-
-				float studyRate = (float) (initailStudyRate*(Math.exp(-(looptimes/looptimesLimit))));
-				float area = (float) (initailArea*(Math.exp(-(looptimes/looptimesLimit))));
-
-				distanceArray = new ArrayList<ArrayList<Float>>();
-				int winnerI = 0;
-				int winnerJ = 0;
-				float sumTemp = Float.MAX_VALUE;
-				float dataX = sortedArray.get(noOfData)[0];
-				float dataY = sortedArray.get(noOfData)[1];
+			chooseFile.setOnMouseClicked(e ->{
 				
-//				System.out.println("inputX: "+dataX+"\t inputY: "+dataY);
+				inputArray = new ArrayList<float[]>();
 				
-				for(int i =0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						neuralArray.get(i).get(j).doSum(dataX,dataY);
+				sortedArray = new ArrayList<float[]>();
+
+				colorArray = new ArrayList<Color>();
+
+				neuralArray = new ArrayList<ArrayList<neuralCordinate>>();
+
+				
+				canvas.getChildren().remove(2, canvas.getChildren().size());
+
+
+				try {
+					inputFileChoose(null);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					System.exit(0);
+					e1.printStackTrace();
+				}
+				
+				normalizeData(inputArray);
+		
+				sortInputArray(inputArray);
+								
+				classAmount = sortedNewDesire + 1;
+
+				System.out.println(classAmount);
+				
+				colorType();
+				
+				drawDataPoints();
+				
+			});
+			
+			
+			generateRandomNet.setOnMouseClicked(e -> {
+				
+				canvas.getChildren().remove(2, canvas.getChildren().size());
+				
+				net = Integer.parseInt(neuralText.getText());
+				
+				neuralArray = new ArrayList<ArrayList<neuralCordinate>>();
+								
+				for(int i=0;i<net;i++){
+					ArrayList<neuralCordinate> an = new ArrayList<neuralCordinate>();
+					for(int j=0;j<net;j++){
+						neuralCordinate n = new neuralCordinate(generateRandom(),generateRandom(),i,j);
+						an.add(n);
 					}
+					neuralArray.add(an);
 				}
+								
+				drawDataPoints();
+
+				drawNet(Color.SKYBLUE);
+
+			});
+	
 			
-				for(int i =0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						float thisNeuralSum = neuralArray.get(i).get(j).getSum();
-//						System.out.println("i: "+i+"\t j: "+j+"\t som : "+thisNeuralSum);
-						if(thisNeuralSum <= sumTemp){
-							sumTemp = thisNeuralSum;
-							winnerI = i;
-							winnerJ = j;
+			doAlgo.setOnMouseClicked(e ->{
+				
+				net = Integer.parseInt(neuralText.getText());
+				looptimesLimit = Integer.parseInt(looptimesText.getText());
+				initailStudyRate = Float.parseFloat(studyRateText.getText());
+				initailArea = Float.parseFloat(omegaText.getText());
+				
+				initialProbArray();
+
+				int noOfData = 0;
+				int looptimes =0;
+
+				while(looptimes<looptimesLimit){
+
+					float studyRate = (float) (initailStudyRate*(Math.exp(-(looptimes/looptimesLimit))));
+					float area = (float) (initailArea*(Math.exp(-(looptimes/looptimesLimit))));
+
+					distanceArray = new ArrayList<ArrayList<Float>>();
+					int winnerI = 0;
+					int winnerJ = 0;
+					float sumTemp = Float.MAX_VALUE;
+					float dataX = sortedArray.get(noOfData)[0];
+					float dataY = sortedArray.get(noOfData)[1];
+					
+					
+					for(int i =0;i<neuralArray.size();i++){
+						for(int j=0;j<neuralArray.get(i).size();j++){
+							neuralArray.get(i).get(j).doCal(dataX,dataY);
 						}
 					}
-				}
 				
-				for(int i =0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						if(i==winnerI&&j==winnerJ){
-							probArray.get(i).set(j, (float) (probArray.get(i).get(j)+0.001*(1-probArray.get(i).get(j))));
-						}
-						else{
-							probArray.get(i).set(j, (float) (probArray.get(i).get(j)+0.001*(0-probArray.get(i).get(j))));
+					for(int i =0;i<neuralArray.size();i++){
+						for(int j=0;j<neuralArray.get(i).size();j++){
+							float thisNeuralSum = neuralArray.get(i).get(j).getSum();
+							if(thisNeuralSum <= sumTemp){
+								sumTemp = thisNeuralSum;
+								winnerI = i;
+								winnerJ = j;
+							}
 						}
 					}
-				}
-				
-//				for(int i =0;i<probArray.size();i++){
-//					for(int j=0;j<probArray.get(i).size();j++){
-//
-//						System.out.print(probArray.get(i).get(j));
-//					}
-//				}
-				
-				
-//				System.out.println("winner info: ");
-//				System.out.println("winner i: "+winnerI+"\t winnder j:"+winnerJ);
-				
-				for(int i =0;i<neuralArray.size();i++){
-				
-					ArrayList<Float> tempArray = new ArrayList<Float>();
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						
-						float dist = 0;
-						float b = 10*((1/net*net)-probArray.get(i).get(j));
-						float x1 = neuralArray.get(winnerI).get(winnerJ).getP1();
-						float y1 =neuralArray.get(winnerI).get(winnerJ).getP2();
-						float x2 = neuralArray.get(i).get(j).getP1();
-						float y2 = neuralArray.get(i).get(j).getP2();
-						dist = (float) Math.hypot(x1-x2, y1-y2);
-						dist = dist-b;
-						tempArray.add(dist);
+					
+					for(int i =0;i<neuralArray.size();i++){
+						for(int j=0;j<neuralArray.get(i).size();j++){
+							if(i==winnerI&&j==winnerJ){
+								probArray.get(i).set(j, (float) (probArray.get(i).get(j)+0.001*(1-probArray.get(i).get(j))));
+							}
+							else{
+								probArray.get(i).set(j, (float) (probArray.get(i).get(j)+0.001*(0-probArray.get(i).get(j))));
+							}
+						}
+					}
+									
+					for(int i =0;i<neuralArray.size();i++){
+					
+						ArrayList<Float> tempArray = new ArrayList<Float>();
+						for(int j=0;j<neuralArray.get(i).size();j++){
+							
+							float dist = 0;
+							float b = 10*((1/net*net)-probArray.get(i).get(j));
+							float x1 = neuralArray.get(winnerI).get(winnerJ).getP1();
+							float y1 =neuralArray.get(winnerI).get(winnerJ).getP2();
+							float x2 = neuralArray.get(i).get(j).getP1();
+							float y2 = neuralArray.get(i).get(j).getP2();
+							dist = (float) Math.hypot(x1-x2, y1-y2);
+							dist = dist-b;
+							tempArray.add(dist);
 
+						}
+						distanceArray.add(tempArray);
 					}
-					distanceArray.add(tempArray);
+
+					
+					for(int i =0;i<neuralArray.size();i++){
+						for(int j=0;j<neuralArray.get(i).size();j++){
+							float oriX = neuralArray.get(i).get(j).getX();
+							float oriY = neuralArray.get(i).get(j).getY();
+							neuralArray.get(i).get(j).setX((float)(oriX+(studyRate*Math.exp(-1*Math.pow(distanceArray.get(i).get(j), 2)/(2*(area*area))))*(dataX-oriX)));
+							neuralArray.get(i).get(j).setY((float)(oriY+(studyRate*Math.exp(-1*Math.pow(distanceArray.get(i).get(j), 2)/(2*(area*area))))*(dataY-oriY)));
+						}
+					}		
+					
+					if(noOfData==sortedArray.size()-1){
+						noOfData=0;
+						Collections.shuffle(sortedArray);
+						looptimes++;
+					}
+					else{
+						noOfData++;
+					}
 				}
 				
-				for(int i=0;i<distanceArray.size();i++){
-					for(int j=0;j<distanceArray.get(i).size();j++){
-// 						System.out.println("distance : "+Math.round(distanceArray.get(i).get(j)*1000)/1000f);
-					}
-				}
-				
-				for(int i =0;i<neuralArray.size();i++){
-					for(int j=0;j<neuralArray.get(i).size();j++){
-						float oriX = neuralArray.get(i).get(j).getX();
-						float oriY = neuralArray.get(i).get(j).getY();
-						neuralArray.get(i).get(j).setX((float)(oriX+(studyRate*Math.exp(-1*Math.pow(distanceArray.get(i).get(j), 2)/(2*(area*area))))*(dataX-oriX)));
-						neuralArray.get(i).get(j).setY((float)(oriY+(studyRate*Math.exp(-1*Math.pow(distanceArray.get(i).get(j), 2)/(2*(area*area))))*(dataY-oriY)));
-					}
-				}		
-				
-//				printNeuralXY();
-				
-//				float weightMaxX = Float.MIN_VALUE;
-//				float weightMaxY = Float.MIN_VALUE;
-//				
-//				for(int i=0;i<neuralArray.size();i++){
-//					for(int j=0;j<neuralArray.get(i).size();j++){
-//						if (Math.abs(neuralArray.get(i).get(j).getX()) > weightMaxX) {
-//							weightMaxX = Math.abs(neuralArray.get(i).get(j).getX());
-//						}
-//						if (Math.abs(neuralArray.get(i).get(j).getY()) > weightMaxY) {
-//							weightMaxY = Math.abs(neuralArray.get(i).get(j).getY());
-//						}
-//					}
-//				}
-//				
-//				for(int i=0;i<neuralArray.size();i++){
-//					for(int j=0;j<neuralArray.get(i).size();j++){
-//						neuralArray.get(i).get(j).setX(neuralArray.get(i).get(j).getX()/weightMaxX);
-//						neuralArray.get(i).get(j).setY(neuralArray.get(i).get(j).getY()/weightMaxY);
-//
-//					}
-//				}
-				
-				if(noOfData==sortedArray.size()-1){
-					if(looptimes%100==0){
-						System.out.println(((float)looptimes/looptimesLimit)*100+"%");
-					}
-					noOfData=0;
-					Collections.shuffle(sortedArray);
-					looptimes++;
-				}
-				else{
-					noOfData++;
-				}
-			}
+				canvas.getChildren().remove(2, canvas.getChildren().size());
+								
+				drawDataPoints();
+
+				drawNet(Color.YELLOW);
+			});
 			
-//			canvas = drawNeurals(canvas);
-			
-			
-			//remove all obj 
-			//canvas.getChildren().remove(0, canvas.getChildren().size());
-			//redraw new neural location
-			canvas = drawNeurals(canvas);
-			
-			canvas = drawNeuralLine(canvas,Color.YELLOW);
-			
-			Scene scene = new Scene(canvas,layoutX,layoutY);
+			root.add(btnVbox, 0, 0);
+			root.add(canvas, 1, 0);
+
+			Scene scene = new Scene(root,layoutX+200,layoutY);
 			
 			primaryStage.setScene(scene);
 			primaryStage.show();
@@ -291,42 +299,51 @@ public class Main extends Application {
 			e.printStackTrace();
 		}
 	}
+
+	public static void initialProbArray(){
+		probArray = new ArrayList<ArrayList<Float>>();
+		
+		for(int i =0;i<neuralArray.size();i++){
+			ArrayList<Float> tempArray = new ArrayList<Float>();
+			for(int j=0;j<neuralArray.get(i).size();j++){
+				float dist = 0;
+				tempArray.add(dist);
+			}
+			probArray.add(tempArray);
+		}	
+	}
 	
 	public static float generateRandom(){
 		Random rand = new Random();
 		float a = 0;
 		if (Math.random() > 0.5) {
 			a = rand.nextFloat() + 0f;
-			// System.out.println("weight : " + token[j]);
 		} else {
 			a = rand.nextFloat() - 1f;
 		}
 		return a;
 	}
 	
-	private static void normalizeData(ArrayList<float[]> array) {
-		/*
-		 * idea: find the biggest number(no matter positive or
-		 *       negative ,set it as denominator
-		 */
-		float maxX = Float.MIN_VALUE;
-		float maxY = Float.MIN_VALUE;
+	public static void drawNet(Color color){
+		drawNeuralLine(color);
+		drawNeurals();
+	}
+	
+	public static void drawNeurals(){
 		
-		for (int i = 0; i < array.size(); i++) {
-			if (Math.abs(array.get(i)[0]) > maxX) {
-				maxX = Math.abs(array.get(i)[0]);
+		for(int j = 0 ;j<neuralArray.size();j++){
+			for(int i = 0;i<neuralArray.get(j).size();i++){
+				Circle circle = new Circle();
+				circle.setCenterX(neuralArray.get(j).get(i).getX()*dataRatio+(layoutX/2));
+				circle.setCenterY((-neuralArray.get(j).get(i).getY())*dataRatio+(layoutY/2));
+				circle.setRadius(2);
+				circle.setFill(Color.WHITE);
+				canvas.getChildren().add(circle);
 			}
-			if (Math.abs(array.get(i)[1]) > maxY) {
-				maxY = Math.abs(array.get(i)[1]);
-			}
-		}
-		for (int i = 0; i < array.size(); i++) {
-				array.get(i)[0] /= maxX;
-				array.get(i)[1] /= maxY;
 		}
 	}
 	
-	public static Pane drawNeuralLine(Pane canvas,Color colorType){
+	public static void drawNeuralLine(Color colorType){
 		for(int i = 0;i<neuralArray.size();i++){
 			for(int j=0;j<neuralArray.get(i).size()-1;j++){
 				Line linkH = new Line();
@@ -350,20 +367,37 @@ public class Main extends Application {
 				canvas.getChildren().add(linkV);
 			}
 		}
-		return canvas;
 	}
 	
-	public static void printNeuralXY(){
-		System.out.println("--------------------------");
-
-		for(int i =0;i<neuralArray.size();i++){
-			for(int j=0;j<neuralArray.get(i).size();j++){
-				float showx = neuralArray.get(i).get(j).getX();
-				float showy = neuralArray.get(i).get(j).getY();
-				System.out.println("x: "+showx+"\t y: "+showy);
+	public static void drawDataPoints(){
+		for(int i = 0;i<classAmount;i++){
+			for(int j = 0 ;j<sortedArray.size();j++){
+				if(sortedArray.get(j)[sortedArray.get(j).length-1]==i){
+					Circle circle = new Circle();
+					circle.setCenterX(sortedArray.get(j)[0]*dataRatio+(layoutX/2));
+					circle.setCenterY((-sortedArray.get(j)[1])*dataRatio+(layoutY/2));
+					circle.setRadius(2);
+					circle.setFill(colorArray.get(i));
+					canvas.getChildren().add(circle);
+				}
 			}
-		}	
-		System.out.println("--------------------------");
+		}
+	}
+	
+	public static void drawCordinateLine(){
+		Line xLine = new Line();
+		xLine.setStroke(black);
+		xLine.setStartX(400);
+		xLine.setStartY(0);
+		xLine.setEndX(400);
+		xLine.setEndY(800);
+		Line yLine = new Line();
+		yLine.setStroke(black);
+		yLine.setStartX(0);
+		yLine.setStartY(400);
+		yLine.setEndX(800);
+		yLine.setEndY(400);
+		canvas.getChildren().addAll(xLine,yLine);
 	}
 	
 	public static void colorType(){
@@ -400,52 +434,26 @@ public class Main extends Application {
 		}
 	}
 	
-	public static Pane drawLine(Pane canvas){
-		Line xLine = new Line();
-		xLine.setStroke(black);
-		xLine.setStartX(400);
-		xLine.setStartY(0);
-		xLine.setEndX(400);
-		xLine.setEndY(800);
-		Line yLine = new Line();
-		yLine.setStroke(black);
-		yLine.setStartX(0);
-		yLine.setStartY(400);
-		yLine.setEndX(800);
-		yLine.setEndY(400);
-		canvas.getChildren().addAll(xLine,yLine);
-		return canvas;
-	}
-	
-	public static Pane drawNeurals(Pane canvas){
+	private static void normalizeData(ArrayList<float[]> array) {
+		/*
+		 * idea: find the biggest number(no matter positive or
+		 *       negative ,set it as denominator
+		 */
+		float maxX = Float.MIN_VALUE;
+		float maxY = Float.MIN_VALUE;
 		
-		for(int j = 0 ;j<neuralArray.size();j++){
-			for(int i = 0;i<neuralArray.get(j).size();i++){
-				Circle circle = new Circle();
-				circle.setCenterX(neuralArray.get(j).get(i).getX()*dataRatio+(layoutX/2));
-				circle.setCenterY((-neuralArray.get(j).get(i).getY())*dataRatio+(layoutY/2));
-				circle.setRadius(2);
-				circle.setFill(Color.PURPLE);
-				canvas.getChildren().add(circle);
+		for (int i = 0; i < array.size(); i++) {
+			if (Math.abs(array.get(i)[0]) > maxX) {
+				maxX = Math.abs(array.get(i)[0]);
+			}
+			if (Math.abs(array.get(i)[1]) > maxY) {
+				maxY = Math.abs(array.get(i)[1]);
 			}
 		}
-		return canvas;
-	}
-	
-	public static Pane drawDataPoints(Pane canvas){
-		for(int i = 0;i<classAmount;i++){
-			for(int j = 0 ;j<sortedArray.size();j++){
-				if(sortedArray.get(j)[sortedArray.get(j).length-1]==i){
-					Circle circle = new Circle();
-					circle.setCenterX(sortedArray.get(j)[0]*dataRatio+(layoutX/2));
-					circle.setCenterY((-sortedArray.get(j)[1])*dataRatio+(layoutY/2));
-					circle.setRadius(2);
-					circle.setFill(colorArray.get(i));
-					canvas.getChildren().add(circle);
-				}
-			}
+		for (int i = 0; i < array.size(); i++) {
+				array.get(i)[0] /= maxX;
+				array.get(i)[1] /= maxY;
 		}
-		return canvas;
 	}
 	
 	public static void sortInputArray(ArrayList<float[]> inputArray) {
@@ -465,6 +473,7 @@ public class Main extends Application {
 		 */
 
 		int iRestFlag = 0;
+		sortedNewDesire = 0;
 		System.out.println("--------- Start sort ---------");
 
 		whileloop: while (true) {
@@ -500,15 +509,13 @@ public class Main extends Application {
 		}
 		System.out.println("The max sorted desire : " + sortedNewDesire);
 	}
-	
-
-	
+		
 	public static void inputFileChoose(String[] args) throws IOException {
 
 		Stage fileStage = new Stage();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Resource File");
-		fileChooser.setInitialDirectory(new File("C:\\Users\\Terry\\Desktop\\nnhw3 SOM dataset"));
+		fileChooser.setInitialDirectory(new File("C:\\Users\\Terry_Lab\\Desktop\\hw3 som"));
 		
 		File file = fileChooser.showOpenDialog(fileStage);
 		System.out.println(file);
@@ -556,5 +563,18 @@ public class Main extends Application {
 			System.out.println("");
 		}
 		System.out.println("");
+	}
+	
+	public static void printNeuralXY(){
+		System.out.println("--------------------------");
+
+		for(int i =0;i<neuralArray.size();i++){
+			for(int j=0;j<neuralArray.get(i).size();j++){
+				float showx = neuralArray.get(i).get(j).getX();
+				float showy = neuralArray.get(i).get(j).getY();
+				System.out.println("x: "+showx+"\t y: "+showy);
+			}
+		}	
+		System.out.println("--------------------------");
 	}
 }
